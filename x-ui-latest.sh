@@ -1017,10 +1017,21 @@ VALUES (
 -- nginx at :443 with TLS.
 INSERT INTO "hosts" ("inbound_id",${gid_col}"sort_order","remark","address","port","security","fingerprint","alpn")
 VALUES
-    ((SELECT id FROM inbounds WHERE tag='inbound-8443'),           ${gid_reality} 0, 'reality', '${domain}', 443, 'same', '',        '[]'),
-    ((SELECT id FROM inbounds WHERE tag='inbound-${ws_port}'),     ${gid_ws}      0, 'ws',      '${domain}', 443, 'tls',  'firefox', '["h2","http/1.1"]'),
+    ((SELECT id FROM inbounds WHERE tag='inbound-8443'), ${gid_reality} 0, 'reality', '${domain}', 443, 'same', '', '[]'),
+    ((SELECT id FROM inbounds WHERE tag='inbound-${ws_port}'), ${gid_ws} 0, 'ws', '${domain}', 443, 'tls', 'firefox', '["h2","http/1.1"]'),
     ((SELECT id FROM inbounds WHERE tag='inbound-/dev/shm/uds2023.sock,0666:0|'), ${gid_xhttp} 0, 'xhttp', '${domain}', 443, 'tls', 'firefox', '["h2","http/1.1"]'),
-    ((SELECT id FROM inbounds WHERE tag='inbound-${trojan_port}'), ${gid_trojan}  0, 'trojan',  '${domain}', 443, 'tls',  'firefox', '["h2","http/1.1"]');
+    ((SELECT id FROM inbounds WHERE tag='inbound-${trojan_port}'), ${gid_trojan} 0, 'trojan', '${domain}', 443, 'tls', 'firefox', '["h2","http/1.1"]');
+
+-- Set the main domain as SNI for the XHTTP client profile.
+UPDATE "hosts"
+SET "sni" = '${domain}',
+    "override_sni_from_address" = 0,
+    "keep_sni_blank" = 0
+WHERE "inbound_id" = (
+    SELECT "id"
+    FROM "inbounds"
+    WHERE "tag" = 'inbound-/dev/shm/uds2023.sock,0666:0|'
+);
 EOF
 
     /usr/local/x-ui/x-ui setting \
