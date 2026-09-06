@@ -333,6 +333,9 @@ EOF
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
+        proxy_busy_buffers_size 128k;
         proxy_pass https://127.0.0.1:${sub_port};
     }
     location = /${sub_path} {
@@ -341,6 +344,9 @@ EOF
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
+        proxy_busy_buffers_size 128k;
         proxy_pass https://127.0.0.1:${sub_port};
     }
     # Regex takes priority over prefix: catches subscription IDs (one-level deep)
@@ -352,6 +358,9 @@ EOF
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
+        proxy_busy_buffers_size 128k;
         proxy_pass https://127.0.0.1:${sub_port};
     }
     location /assets  { proxy_pass https://127.0.0.1:${sub_port}; }
@@ -364,6 +373,9 @@ EOF
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
+        proxy_busy_buffers_size 128k;
         proxy_pass https://127.0.0.1:${sub_port};
     }
     location /${json_path}/ {
@@ -372,6 +384,9 @@ EOF
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_buffer_size 64k;
+        proxy_buffers 4 64k;
+        proxy_busy_buffers_size 128k;
         proxy_pass https://127.0.0.1:${sub_port};
     }
 
