@@ -31,7 +31,7 @@
 **Шаг 1 — скачать скрипт**
 
 ```bash
-wget -qO x-ui-latest.sh https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-latest.sh
+wget -qO x-ui-latest.sh https://raw.githubusercontent.com/salomatinivan2010/3x-ui-pro/refs/heads/main/x-ui-latest.sh
 ```
 
 **Шаг 2 — запустить**
