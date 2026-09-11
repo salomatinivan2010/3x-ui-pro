@@ -1213,11 +1213,72 @@ setup_cron() {
 # ─────────────────────────────────────────────────────────────────────────────
 setup_firewall() {
     ufw disable
-    ufw allow 22/tcp
-    ufw allow 80/tcp
-    ufw allow 443/tcp
-    ufw allow 443/udp
-    ufw --force enable
+
+    local ssh_port ssh_config ssh_socket
+    local -a ssh_ports=(22)
+    local -A ssh_seen=()
+
+    if [[ -n "${SSH_CONNECTION:-}" ]]; then
+        ssh_ports+=("${SSH_CONNECTION##* }")
+    fi
+
+    if ssh_config=$(/usr/sbin/sshd -T 2>/dev/null); then
+        while read -r ssh_port; do
+            ssh_ports+=("$ssh_port")
+        done < <(
+            awk '$1 == "port" {print $2}' <<< "$ssh_config"
+        )
+    else
+        msg_inf "Не удалось прочитать конфигурацию sshd."
+    fi
+
+    for ssh_socket in ssh.socket sshd.socket; do
+        if systemctl is-active --quiet "$ssh_socket"; then
+            while read -r ssh_port; do
+                ssh_ports+=("$ssh_port")
+            done < <(
+                systemctl show "$ssh_socket" \
+                    --property=Listen --value 2>/dev/null |
+                awk '{
+                    for (i = 2; i <= NF; i++) {
+                        if ($i == "(Stream)") {
+                            p = $(i-1)
+                            sub(/^.*:/, "", p)
+                            if (p ~ /^[0-9]+$/) print p
+                        }
+                    }
+                }'
+            )
+        fi
+    done
+
+    for ssh_port in "${ssh_ports[@]}"; do
+        [[ "$ssh_port" =~ ^[0-9]{1,5}$ ]] || continue
+        ssh_port=$((10#$ssh_port))
+        (( ssh_port >= 1 && ssh_port <= 65535 )) || continue
+
+        [[ -n "${ssh_seen[$ssh_port]:-}" ]] && continue
+        ufw allow "${ssh_port}/tcp" || return 1
+        ssh_seen[$ssh_port]=1
+        msg_inf "SSH: разрешён TCP-порт ${ssh_port}"
+    done
+    ufw allow 80/tcp || return 1
+    ufw allow 443/tcp || return 1
+    ufw allow 443/udp || return 1
+
+    ufw allow "${panel_port}/tcp" || return 1
+    ufw allow "${sub_port}/tcp" || return 1
+    ufw allow "${ws_port}/tcp" || return 1
+    ufw allow "${trojan_port}/tcp" || return 1
+
+    local internal_port
+    for internal_port in 7443 8443 9443 "$mtr_backend_port"; do
+        ufw allow in on lo proto tcp to any port "$internal_port" \
+            || return 1
+    done
+    
+    ufw --force enable || return 1
+    ufw status numbered
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -1265,7 +1326,10 @@ main() {
     install_diagnostics
     tune_system
     setup_cron
-    setup_firewall
+    setup_firewall || {
+        msg_err "Не удалось настроить UFW. Проверьте правила файервола."
+        exit 1
+    }
 
     if ! systemctl is-enabled --quiet x-ui; then
         systemctl daemon-reload && systemctl enable x-ui.service
@@ -1274,5 +1338,4 @@ main() {
 
     show_results
 }
-
 main
