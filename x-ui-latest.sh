@@ -838,9 +838,9 @@ configure_xui_db() {
 DELETE FROM "settings" WHERE "key" IN ("webCertFile","webKeyFile");
 
 INSERT INTO "settings" ("key","value") VALUES ("subPort",             '${sub_port}');
-INSERT INTO "settings" ("key","value") VALUES ("subPath",             '/${sub_path}/');
+UPDATE "settings" SET "value" = '/${sub_path}/' WHERE "key" = 'subPath';
 INSERT INTO "settings" ("key","value") VALUES ("subURI",              '${sub_uri}');
-INSERT INTO "settings" ("key","value") VALUES ("subJsonPath",         '/${json_path}');
+UPDATE "settings" SET "value" = '/${json_path}/' WHERE "key" = 'subJsonPath';
 INSERT INTO "settings" ("key","value") VALUES ("subJsonURI",          '${json_uri}');
 INSERT INTO "settings" ("key","value") VALUES ("subClashEnable",      'false');
 INSERT INTO "settings" ("key","value") VALUES ("subEnableRouting",    'false');

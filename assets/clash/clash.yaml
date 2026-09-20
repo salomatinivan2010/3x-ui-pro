@@ -56,6 +56,9 @@ proxy-providers:
     url: https://${DOMAIN}/${SUB_PATH}/${SUB_ID}?provider=1
     path: ./proxy_providers/base64.yml
     interval: 3600
+    override:
+      override-expr:
+        - '(select(.type == "vless" and .["reality-opts"] != null) | .["reality-opts"]["support-x25519mlkem768"]) = true'
     health-check:
       enable: true
       url: https://www.gstatic.com/generate_204
