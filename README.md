@@ -52,18 +52,6 @@ wget -qO x-ui-latest.sh https://raw.githubusercontent.com/salomatinivan2010/3x-u
 ```bash
 bash x-ui-latest.sh
 ```
-
----
-## Патч
-
-Применить текущие фиксы к существующей установке (без изменений БД):
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/mozaroc/3x-ui-pro/main/x-ui-patch.sh)
-```
-
----
-
 ## AdGuard Home (опционально)
 
 Устанавливает [AdGuard Home](https://github.com/AdguardTeam/AdGuardHome) на домен панели — без отдельного домена и открытых портов, всё через существующий 443:
